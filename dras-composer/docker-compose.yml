@@ -1,0 +1,91 @@
+version: "3.7"
+services:
+  db:
+    image: mariadb:10.5
+    command: --default-authentication-plugin=mysql_native_password
+    container_name: dras-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+        MYSQL_DATABASE: dras
+    ports:
+      - "4822:3306"
+    volumes:
+      - ./mysql-files:/var/lib/mysql
+      - ./mysql-scripts:/docker-entrypoint-initdb.d
+    restart: always
+    networks:
+      - dras
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: dras-db-admin
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: root
+      UPLOAD_LIMIT: 300M
+    ports:
+      - "4801:80"
+    restart: always
+    networks:
+      - dras
+  dozzle:
+    image: amir20/dozzle
+    container_name: dras-logs
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8081:8080"
+    networks:
+      - dras
+  dras-backend:
+    build:
+      context: dras-backend
+      args:
+        DB_IP: dras-db
+        DB_PORT: 3306
+        DB_NAME: dras
+        DB_USERNAME: root
+        DB_PASSWORD: root
+        RMT: https://rmt.ds.unipi.gr
+        REDIS_HOST: redis
+        REDIS_PORT: 6399
+        REDIS_PASSWORD: sOmE_sEcUrE_pAsS
+      dockerfile: Dockerfile
+    image: dras-backend
+    container_name: dras-backend
+    ports:
+      - "15502:15502"
+    restart: always
+    networks:
+      - dras
+  dras-frontend:
+    build:
+      context: dras-frontend
+      dockerfile: Dockerfile
+      args:
+        BACKEND_URL: http://localhost:15502/api
+    image: dras-frontend
+    container_name: dras-frontend
+    ports:
+      - "5000:80"
+    restart: always
+    networks:
+      - dras
+  redis:
+    image: "redis:alpine"
+    container_name: redis
+    command: redis-server --requirepass sOmE_sEcUrE_pAsS
+    ports:
+      - "6399:6379"
+    volumes:
+      - $PWD/redis-data:/var/lib/redis
+      - $PWD/redis.conf:/usr/local/etc/redis/redis.conf
+    environment:
+      - REDIS_REPLICATION_MODE=master
+    networks:
+      - dras
+networks:
+  dras:
+    name: dras
+    driver: bridge
