@@ -1,9 +1,6 @@
-FROM adoptopenjdk/openjdk11:jre11u-centos-nightly
+FROM eurodynrnd/dras-backend:latest
 
 EXPOSE 15502
-
-ARG JAR_FILE=sofia-0.0.1.jar
-ADD ${JAR_FILE} app.jar
 
 ARG DB_IP
 ARG DB_PORT
