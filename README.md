@@ -1,214 +1,231 @@
-﻿# **Deployment guide**
-1. ## ` `Docker Installation on Windows
-RITA software and its components will be delivered utilizing the Docker containers functionalities. The delivered is configured to be containerized in four images that will be up and running four different and isolated virtual machines, accordingly. A detailed description on the separate images, their configuration and interaction will follow in the following sections. 
+﻿## **Dynamic Risk Assessment System Deployment guide**
+#### **Prerequisites and Installation**
+The hardware and operating system prerequisites are:
 
-Firstly, the Docker platform has to be downloaded and installed accordingly to the OS of the server to host the deployment.
-### ***For Windows server***
-**1.** Install Docker from <https://hub.docker.com/?overlay=onboarding> (First you will need to create an account on the same page) 
+- A 2-core processor 
+- 4GB RAM Memory
+- 50GB of disk space or more
 
-**2.** After the installation if Docker has not started automatically open start Menu, type Docker and select the Docker icon that appears.
+The software prerequisites include:
 
-![image1](./image1.png)
+- Centos 7 or Windows Server Operative System (OS);
+- docker and docker-compose;
 
-![image2](./image2.png)
-**3.** Docker may take some time to start. When it has successfully started you should able to see the icon on the bottom right of your screen. 
+RITA software and its components will be delivered utilizing the Docker containers functionalities. Firstly, the Docker platform has to be downloaded and installed accordingly to the OS of the server to host the deployment. 
 
-**4.** Troubleshooting.
+**For Windows server**
 
-*a.* Docker in order to run requires specific support from the cpu but most recent PCs should support it. 
+1. Install Docker from <https://hub.docker.com/?overlay=onboarding> (First you will need to create an account on the same page)
+1. After the installation if Docker has not started automatically open start Menu, type Docker and select the Docker icon that appears.
 
-*b.* Hyper-V should be installed and enabled in windows and Virtualization should be enabled in your BIOS.  Please also consult the following page <https://docs.docker.com/docker-for-windows/troubleshoot/#virtualization/> .
-### ***For Linux*** 
-Install Docker Engine on Ubuntu
+![](image1.png)
 
-Prerequisites
+*Figure 1. Launching Docker (Windows Server)*
 
-OS requirements
+1. Docker may take some time to start. When it has successfully started you should able to see the icon on the bottom right of your screen
 
-To install Docker Engine, you need the 64-bit version of one of these Ubuntu versions:
+![](image2.png)
 
-- Ubuntu Groovy 20.10
-- Ubuntu Focal 20.04 (LTS)
-- Ubuntu Bionic 18.04 (LTS)
-- Ubuntu Xenial 16.04 (LTS)
+*Figure 2. Docker Successfully Started (Windows Server)*
 
-Docker Engine is supported on x86\_64 (or amd64), armhf, and arm64 architectures.
+**Troubleshooting:**
 
-Uninstall old versions
+- Docker in order to run requires specific support from the CPU but most recent PCs should support it. 
+- Hyper-V should be installed and enabled in windows and Virtualization should be enabled in your BIOS.  Please also consult the following page <https://docs.docker.com/docker-for-windows/troubleshoot/#virtualization/> .
 
-Older versions of Docker were called docker, docker.io, or docker-engine. If these are installed, uninstall them:
+**For Linux server**
 
-$ sudo apt-get remove docker docker-engine docker.io containerd runc
+1. Update the apt package index and install packages to allow apt to use a repository over HTTPS. 
 
-It’s OK if apt-get reports that none of these packages are installed.
+For 64-bit version of CentOS type:
+```
+$ sudo yum update
 
-The contents of /var/lib/docker/, including images, containers, volumes, and networks, are preserved. If you do not need to save your existing data, and want to start with a clean installation, refer to the uninstall Docker Engine section at <https://docs.docker.com/engine/install/ubuntu/#uninstall-docker-engine> .
+$ sudo yum install \
+ apt-transport-https \
+ ca-certificates \
+ curl \
+ gnupg-agent \
+ software-properties-common
+```
 
-Installation
-
-The Docker Engine can be installed by setting up the Docker’s repositories and installing directly from them, fact which eases the installation and subsequent upgrade tasks.
-
-Before you install Docker Engine for the first time on a new host machine, you need to set up the Docker repository. Afterward, you can install and update Docker from the repository.
-
-SET UP THE REPOSITORY
-
-1. Update the apt package index and install packages to allow apt to use a repository over HTTPS:
-
+For 64-bit version of one of Ubuntu versions (Groovy 20.10, Focal 20.04 (LTS), Bionic 18.04 (LTS), Xenial 16.04 (LTS)) type:
+```
 $ sudo apt-get update
 
 $ sudo apt-get install \
+apt-transport-https \
+ca-certificates \
+curl \
+gnupg-agent \
+software-properties-common
+```
+2. Add Docker’s official GPG key
 
-`    `apt-transport-https \
+`$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -`
 
-`    `ca-certificates \
+3. Verify the key by searching for the last 8 characters of the fingerprint.
 
-`    `curl \
+`sudo apt-key fingerprint <last 8 characters of the fingerprint >`
 
-`    `gnupg-agent \
+4. Install Docker. According to the Docker installation[^1] we should:
+- Set up the Docker repository.
 
-`    `software-properties-common
-
-1. Add Docker’s official GPG key:
-
-$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-
-Verify that you now have the key with the fingerprint 9DC8 5822 9FC7 DD38 854A  E2D8 8D81 803C 0EBF CD88, by searching for the last 8 characters of the fingerprint.
-
-$ sudo apt-key fingerprint 0EBFCD88
-
-pub   rsa4096 2017-02-22 [SCEA]
-
-`      `9DC8 5822 9FC7 DD38 854A  E2D8 8D81 803C 0EBF CD88
-
-uid           [ unknown] Docker Release (CE deb) <docker@docker.com>
-
-sub   rsa4096 2017-02-22 [S]
-
-Use the following command to set up the stable repository. To add the nightly or test repository, add the word nightly or test (or both) after the word stable in the commands below. Learn about nightly and test channels.
-
-Note: The lsb\_release -cs sub-command below returns the name of your Ubuntu distribution, such as xenial. Sometimes, in a distribution like Linux Mint, you might need to change $(lsb\_release -cs) to your parent Ubuntu distribution. For example, if you are using Linux Mint Tessa, you could use bionic. Docker does not offer any guarantees on untested and unsupported Ubuntu distributions.
-
-x86\_64 / amd64
-
-armhf
-
-arm64
-
+For 64-bit version of CentOS type:
+```
+$sudo yum install -y yum-utils
+$sudo yum-config-manager \
+  --add-repo \
+  https://download.docker.com/linux/centos/docker-ce.repo
+```
+For 64-bit version of Ubuntu use the following command to set up the stable repository:
+```
 $ sudo add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+$(lsb_release -cs) \
+   stable"
+```
+- Install the latest version of Docker Engine and *containerd*.
 
-`   `"deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+For 64-bit version of CentOS type:
 
-`   `$(lsb\_release -cs) \
+`$sudo yum install docker-ce docker-ce-cli containerd.io`
 
-`   `stable"
+For 64-bit versions of Ubuntu type:
 
-INSTALL DOCKER ENGINE
+`$ sudo apt-get install docker-ce docker-ce-cli containerd.io`
 
-1. Update the apt package index, and install the latest version of Docker Engine and containerd, or go to the next step to install a specific version:
+- Start and enable docker by typing:
+```
+$sudo systemctl start docker
+$sudo systemctl enable docker
+```
+- Verify that Docker Engine is installed correctly by running the hello-world image:
+  
+`$ sudo docker run hello-world`
 
-` `$ sudo apt-get update
+This command downloads a test image and runs it in a container. When the container runs, it prints an informational message and exits
 
-` `$ sudo apt-get install docker-ce docker-ce-cli containerd.io
+5. Install Docker compose. Docker Compose is a tool for defining and running multi-container Docker applications. With Compose, we use a YAML Ain't Markup Language (YAML) file to configure our application’s services. Then, with a single command, we create and start all the services from our configuration. According to the docker compose installation  we should:
+- Download the current stable release of Docker Compose, by typing:
+  
+`$ curl -L "https://github.com/docker/compose/releases/download/1.28.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose`
 
-*Got multiple Docker repositories?*
+- Apply executable permissions to the binary, by typing:
 
-*If you have multiple Docker repositories enabled, installing or updating without specifying a version in the apt-get install or apt-get update command always installs the highest possible version, which may not be appropriate for your stability needs.*
+`$sudo chmod +x /usr/local/bin/docker-compose`
 
-1. To install a specific version of Docker Engine, list the available versions in the repo, then select and install:
+RITA-DRAS is available online in six specified co-existing docker images to efficiently distribute the software avoiding the likelihood of collisions. Therefore, there is one image specified to host the backend application (*dras-backend*) as well as one for the frontend application (*dras-frontend*). Two other docker images are created to host the RITA database (*dras-db*) and the PhpMyAdmin application (*phpmyadmin*) to be able to access the database from a UI for administrative purposes, also an image with Redis server (*redis*) is created and used by RITA-DRAS for caching and the sixth docker image provides access and navigation to the log files of RITA-DRAS and is used for debugging purposes.
 
-a. List the versions available in your repo:
+To proceed with the installation of RITA-DRAS, the user must use the *dras-compose* folder that contains all the necessary configuration of the backend, frontend and the database.
 
-$ apt-cache madison docker-ce
+6. Next step is to deploy RITA DRAS using Docker Compose. First step is to clone the <https://github.com/european-dynamics-rnd/CitySCAPE-DRAS>  repository, by typing:
+```
+cd /opt/rita/
+git clone https://github.com/european-dynamics-rnd/CitySCAPE-DRAS.git
+```
+7. Use the following yml file (docker-compose.yml), located under */opt/rita/dras-compose/* to configure all aspects of the DRAS container:
+```
+version: "3.7"
+services:
+  db:
+    image: mariadb:10.5
+    command: --default-authentication-plugin=mysql_native_password
+    container_name: dras-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "4822:3306"
+    volumes:
+      - ./mysql-files:/var/lib/mysql
+      - ./mysql-scripts:/docker-entrypoint-initdb.d
+    restart: always
+    networks:
+      - dras 
+ phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    restart: always
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: root
+    ports:
+      - "4801:80"
+   networks:
+      - dras
+  redis:
+    image: "redis:alpine"
+    container_name: redis
+    command: redis-server --requirepass redls133o1q@z
+    ports:
+      - "6399:6379"
+    volumes:
+      - $PWD/redis-data:/var/lib/redis
+      - $PWD/redis.conf:/usr/local/etc/redis/redis.conf
+    environment:
+      - REDIS_REPLICATION_MODE=master
+    networks:
+      - dras
+  dozzle:
+image: amir20/dozzle
+container_name: dras-logs
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8081:8080"
+   networks:
+      - dras
+  dras-backend:
+    build:
+      context: ./dras-backend
+      args:
+        DB_IP: dras-db
+        DB_PORT: 3306
+        DB_NAME: dras
+        DB_USERNAME: root
+        DB_PASSWORD: root
+        RMT: https://rmt.ds.unipi.gr
+        REDIS_HOST: redis
+        REDIS_PORT: 6399
+        REDIS_PASSWORD: redls133o1q@z
+      dockerfile: Dockerfile
+    image: dras-backend
+    container_name: dras-backend
+    ports:
+      - "15502:15502"
+    restart: always
+    networks:
+      - dras
+  dras-frontend:
+    build:
+      context: ./dras-frontend
+      dockerfile: Dockerfile
+      args:
+        BACKEND_URL: https://cityscape-rita.eurodyn.com/api
+    image: dras-frontend
+    container_name: dras-frontend
+    ports:
+      - "5000:80"
+    restart: always
+    networks:
+      - dras
+networks:
+  dras:
+    name: dras
+    driver: bridge
+```
+8. Finally execute:
+   
+```
+$cd dras-compose
+$docker-compose up –d
+$docker-compose logs -f
+```
+9. If no errors are seen, this means that DRAS was successfully deployed. We can validate that by typing in a web-browser: http://localhost:5000 resulting in the next screen.
 
-`  `docker-ce | 5:18.09.1~3-0~ubuntu-xenial | https://download.docker.com/linux/ubuntu  xenial/stable amd64 Packages
-
-`  `docker-ce | 5:18.09.0~3-0~ubuntu-xenial | https://download.docker.com/linux/ubuntu  xenial/stable amd64 Packages
-
-`  `docker-ce | 18.06.1~ce~3-0~ubuntu       | https://download.docker.com/linux/ubuntu  xenial/stable amd64 Packages
-
-`  `docker-ce | 18.06.0~ce~3-0~ubuntu       | https://download.docker.com/linux/ubuntu  xenial/stable amd64 Packages
-
-`  `...
-
-b. Install a specific version using the version string from the second column, for example, 5:18.09.1~3-0~ubuntu-xenial.
-
-$ sudo apt-get install docker-ce=<VERSION\_STRING> docker-ce-cli=<VERSION\_STRING> containerd.io
-
-Verify that Docker Engine is installed correctly by running the hello-world image.
-
-$ sudo docker run hello-world
-
-This command downloads a test image and runs it in a container. When the container runs, it prints an informational message and exits.
-
-Docker Engine is installed and running. The docker group is created but no users are added to it. You need to use sudo to run Docker commands. Continue to Linux postinstall to allow non-privileged users to run Docker commands and for other optional configuration steps.
-1. ## RITA deployment
-RITA will be available online in six specified co-existing docker images to efficiently distribute the software avoiding the likelihood of collisions. Therefore, there is one image specified to host the backend application (rita-backend) as well as one for the frontend application (rita-frontend). Tow other docker images are created to host the RITA database (rita-db) and the PhpMyAdmin application (phpmyadmin) to be able to access the Database from a Ui for administrative purposes, also an image with Redis server (redis) is created and used by rita for cacheing and the sixth docker image provides access and navigation to the log files of rita and is used for debugging purposes.
-
-To proceed with the installation of RITA, the user must use the rita-compose folder that contains all the necessary configuration of the backend, frontend and the database, accordingly. 
-
-You can configure a number of aspects such as URLs, ports & connections between the defined components. All the configuration is located on the *“rita-composer/docker-compose.yml”*
+![](image3.png)
 
 
-|<p>version: "3.7"</p><p>services:</p><p>`  `**db**:</p><p>`    `image: mariadb:10.5</p><p>`    `command: --default-authentication-plugin=mysql\_native\_password</p><p>`    `container\_name: rita-db</p><p>`    `environment:</p><p>`      `MYSQL\_ROOT\_PASSWORD: root</p><p>`    `ports:</p><p>`      `- "4822:3306"</p><p>`    `volumes:</p><p>`      `- ./mysql-files:/var/lib/mysql</p><p>`      `- ./mysql-scripts:/docker-entrypoint-initdb.d</p><p>`    `restart: always</p><p>`    `networks:</p><p>`      `- rita </p><p>` `**phpmyadmin**:</p><p>`    `image: phpmyadmin/phpmyadmin:latest</p><p>`    `restart: always</p><p>`    `environment:</p><p>`      `PMA\_HOST: db</p><p>`      `PMA\_USER: root</p><p>`      `PMA\_PASSWORD: root</p><p>`    `ports:</p><p>`      `- "4801:80"</p><p>`   `networks:</p><p>`      `- rita</p><p>`  `**redis**:</p><p>`    `image: "redis:alpine"</p><p>`    `container\_name: redis</p><p>`    `command: redis-server --requirepass redls133o1q@z</p><p>`    `ports:</p><p>`      `- "6399:6379"</p><p>`    `volumes:</p><p>`      `- $PWD/redis-data:/var/lib/redis</p><p>`      `- $PWD/redis.conf:/usr/local/etc/redis/redis.conf</p><p>`    `environment:</p><p>`      `- REDIS\_REPLICATION\_MODE=master</p><p>`    `networks:</p><p>`      `- rita</p><p>`  `**dozzle**:</p><p>image: amir20/dozzle</p><p>container\_name: rita-logs</p><p>`    `restart: always</p><p>`    `volumes:</p><p>`      `- /var/run/docker.sock:/var/run/docker.sock</p><p>`    `ports:</p><p>`      `- "8081:8080"</p><p>`   `networks:</p><p>`      `- rita</p><p>`  `**rita-backend**:</p><p>`    `build:</p><p>`      `context: ./rita-backend</p><p>`      `args:</p><p>`        `DB\_IP: rita-db</p><p>`        `DB\_PORT: 3306</p><p>`        `DB\_NAME: rita</p><p>`        `DB\_USERNAME: root</p><p>`        `DB\_PASSWORD: root</p><p>`        `RMT: https://rmt.ds.unipi.gr</p><p>`        `REDIS\_HOST: redis</p><p>`        `REDIS\_PORT: 6399</p><p>`        `REDIS\_PASSWORD: redls133o1q@z</p><p>`      `dockerfile: Dockerfile</p><p>`    `image: rita-backend</p><p>`    `container\_name: rita-backend</p><p>`    `ports:</p><p>`      `- "15502:15502"</p><p>`    `restart: always</p><p>`    `networks:</p><p>`      `- rita</p><p>`  `**rita-frontend**:</p><p>`    `build:</p><p>`      `context: ./rita-frontend</p><p>`      `dockerfile: Dockerfile</p><p>`      `args:</p><p>`        `BACKEND\_URL: http://localhost:15502/api</p><p>`    `image: rita-frontend</p><p>`    `container\_name: rita-frontend</p><p>`    `ports:</p><p>`      `- "5000:80"</p><p>`    `restart: always</p><p>`    `networks:</p><p>`      `- rita</p><p>**networks**:</p><p>`  `rita:</p><p>`    `name: rita</p><p>`    `driver: bridge</p>|
-| - |
 
-On this file we can clearly see the four containers and their subsequent configuration. The most important parameter that we can change are the ports of every application, the backend’s connection to the database, the backend’s connection to the RMT services, the frontend connection url to the backend, and the database credetials.
-
-Deployment process
-
-To perform the deployment of RITA, one have to proceed with the following steps:
-
-1. ` `Open the Command Prompt window and navigate to the rita-composer folder. 
-
-\2. In the new window, type 
-
-CONFIGURATION=<parameter> docker-compose up --build -d 
-
-and press <enter>.
-
-The deployment will start automatically.
-
-![image3](./image3.png)
-
-This command automatically downloads four docker images; The six images are being configure and deployed into four containers as described earlier. After the instantiation of the images (via Docker containers) and the proper setting of localhost server ports, one may login navigate to RITA platform using the local address and the exposed port defined on the **rita-frontend** section of the docker-composer.yml file. Therefore, for the above configuration access can be performed via  [*http://localhost:5000/](http://localhost:8080/)*   
-
-![image4](./image4.png)
-
-Finally you can stop rita with the following command, while you are on the deployment folder docker-compose down.
-
-
-Update process
-
-RITA updates are automatic and available online on dockerhub. In order to upgrade to the latest versions follow the steps below
-
-1. Navigate to the folders in which you have cloned the repository 
-1. https://github.com/european-dynamics-rnd/CitySCAPE-DRAS
-
-**2.** Run the following commands inside the docker-compose-files/ directory (where *docker-compose.yml* is located)
-
-**a.** Stop the current instance of rita
-
-docker-compose down
-
-**b.** Pull the latest version of the starting scripts. Here since you made changes to the *docker-compose.yml* these may be overwritten. Either stash/merge the changes or reinsert them after the pull.
-
-git pull
-
-**c.** Delete the containers of the previous version 
-
-docker image rm eurodynrnd/rita-backend eurodynrnd/rita-frontend rita-backend rita-frontend
-
-**d.** Change any parameters as necessary inside the *docker-compose.yml* and run the following command to download and run the new version
-
-CONFIGURATION==<parameter>  docker-compose up --build
-
-1. ## Dozzle - Rita logs inspection
-You can navigate the log inspection on the <http://localhost:8081/> address using your browser.
-
-![image5](./image5.png)
-
-On the main screen you can see all the running containers and you must select the rita container to navigate to the rita applications logs. 
-
-![image6](./image6.png)
-
-Finally on this screen you can navigate, search or download the log files. 
+[^1]: <https://docs.docker.com/engine/install/centos/> 
