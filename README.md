@@ -22,7 +22,7 @@ RITA software and its components will be delivered utilizing the Docker containe
 
 *Figure 1. Launching Docker (Windows Server)*
 
-1. Docker may take some time to start. When it has successfully started you should able to see the icon on the bottom right of your screen
+3. Docker may take some time to start. When it has successfully started you should able to see the icon on the bottom right of your screen
 
 ![](image2.png)
 
